@@ -1180,7 +1180,7 @@ def model_run_v2(prompt, seed, traj_list, n_samples=1):
         return gr.update(value=file_path_list[1], height=image_size[0], width=image_size[1])
 
 
-def main(args):
+def main():
     global canvas_width, canvas_height
     canvas_width, canvas_height, grid_size = 720, 480, 120
     grid_image = create_grid_image(canvas_width, canvas_height, grid_size)
@@ -1194,8 +1194,6 @@ def main(args):
 
     demo = gr.Blocks()
     with demo:
-        # gr.Markdown(title)
-        # gr.Markdown(description)
         gr.Markdown("""
             <div style="text-align: center; font-size: 32px; font-weight: bold; margin-bottom: 20px;">
                 Tora
@@ -1205,27 +1203,24 @@ def main(args):
                 <a href="https://ali-videoai.github.io/tora_video/">Project Page</a> |
                 <a href="https://arxiv.org/abs/2407.21705">arXiv</a>
             </div>
-            """)
+        """)
 
         with gr.Column():
             with gr.Row():
                 with gr.Column():
-                    # step1.2 - object motion control - draw yourself
-                    gr.Markdown("---\n## Step 1/2: Draw A Trajectory", show_label=False, visible=True)
+                    gr.Markdown("---\n## Step 1/2: Draw A Trajectory", show_label=False)
                     gr.Markdown(
-                        "\n 1. **Click on the `Canvas` to create a trajectory.** Each click adds a new point to the trajectory. \
-                        \n 2. Click on `Visualize Trajectory` to view the trajectory as a video; \
-                        \n 3. Click on `Reset Trajectory` to clear the trajectory. (Currently, this demo does not support multi-trajectory control. To achieve multi-trajectory control, you can use the command line available on <a href='https://github.com/alibaba/Tora'>GitHub</a>.)",
+                        "\n 1. **Click on the `Canvas` to create a trajectory.** Each click adds a new point. \
+                        \n 2. Click `Visualize Trajectory` to view the video; \
+                        \n 3. Click `Reset Trajectory` to clear.",
                         show_label=False,
-                        visible=True,
                     )
-
-                    traj_args = gr.Textbox(value="", label="Points of Trajectory", visible=True)
+                    traj_args = gr.Textbox(value="", label="Points of Trajectory")
                     traj_list = gr.State([])
                     with gr.Row():
-                        traj_vis = gr.Button(value="Visualize Trajectory", visible=True)
-                        traj_reset = gr.Button(value="Reset Trajectory", visible=True)
-                        traj_droplast = gr.Button(value="Drop Last Point", visible=True)
+                        traj_vis = gr.Button(value="Visualize Trajectory")
+                        traj_reset = gr.Button(value="Reset Trajectory")
+                        traj_droplast = gr.Button(value="Drop Last Point")
 
                 with gr.Column():
                     traj_input = gr.Image(
@@ -1233,137 +1228,84 @@ def main(args):
                         width=canvas_width // 2,
                         height=canvas_height // 2,
                         label="Canvas for Drawing",
-                        visible=True,
                     )
-
                     vis_traj = gr.Video(
                         value=None,
                         label="Trajectory",
-                        visible=True,
                         width=canvas_width // 2,
                         height=canvas_height // 2,
                     )
 
-            # step2 - Add prompt and Generate videos
             with gr.Row():
                 with gr.Column():
-                    step3_prompt_generate = gr.Markdown(
-                        "---\n## Step 2/2: Add prompt(Highly recommend using GPT-4o for refinement).",
-                        show_label=False,
-                        visible=True,
-                    )
-                    prompt = gr.Textbox(value="", label="Prompt", interactive=True, visible=True)
+                    gr.Markdown("---\n## Step 2/2: Add Prompt", show_label=False)
+                    prompt = gr.Textbox(value="", label="Prompt", interactive=True)
                     n_samples = gr.Number(value=1, precision=0, interactive=True, label="n_samples", visible=False)
-                    seed = gr.Number(value=1234, precision=0, interactive=True, label="Seed", visible=True)
-                    start = gr.Button(value="Generate", visible=True)
+                    seed = gr.Number(value=1234, precision=0, interactive=True, label="Seed")
+                    start = gr.Button(value="Generate")
                 with gr.Column():
-                    gen_video = gr.Video(value=None, label="Generate Video", visible=True)
-                    # gen_video = gr.Gallery(value=None, label="Generate Video", visible=True)
+                    gen_video = gr.Video(value=None, label="Generated Video")
 
-            # traj examples
             with gr.Column():
-                gr.Markdown("---\n## Trajectory Examples", show_label=False, visible=True)
+                gr.Markdown("---\n## Trajectory Examples", show_label=False)
                 with gr.Row():
-                    traj_1 = gr.Button(value="circle", visible=True)
-                    traj_2 = gr.Button(value="spiral", visible=True)
-                    traj_3 = gr.Button(value="coaster", visible=True)
-                    traj_4 = gr.Button(value="dance", visible=True)
+                    traj_1 = gr.Button(value="circle")
+                    traj_2 = gr.Button(value="spiral")
+                    traj_3 = gr.Button(value="coaster")
+                    traj_4 = gr.Button(value="dance")
                 with gr.Row():
-                    traj_5 = gr.Button(value="infinity", visible=True)
-                    traj_6 = gr.Button(value="pause", visible=True)
-                    traj_7 = gr.Button(value="shake", visible=True)
-                    traj_8 = gr.Button(value="wave", visible=True)
+                    traj_5 = gr.Button(value="infinity")
+                    traj_6 = gr.Button(value="pause")
+                    traj_7 = gr.Button(value="shake")
+                    traj_8 = gr.Button(value="wave")
 
-            # prompt examples
             with gr.Column():
-                gr.Markdown("---\n## Prompt Examples", show_label=False, visible=True)
+                gr.Markdown("---\n## Prompt Examples", show_label=False)
                 with gr.Row():
-                    prompt_1 = gr.Button(value="rubber duck", visible=True)
-                    prompt_2 = gr.Button(value="dandelion", visible=True)
-                    prompt_3 = gr.Button(value="golden retriever", visible=True)
-                    prompt_4 = gr.Button(value="squirrel", visible=True)
+                    prompt_1 = gr.Button(value="rubber duck")
+                    prompt_2 = gr.Button(value="dandelion")
+                    prompt_3 = gr.Button(value="golden retriever")
+                    prompt_4 = gr.Button(value="squirrel")
 
-        traj_1.click(fn=add_provided_traj, inputs=[traj_list, traj_1], outputs=[traj_input, traj_args, traj_input])
-        traj_2.click(fn=add_provided_traj, inputs=[traj_list, traj_2], outputs=[traj_input, traj_args, traj_input])
-        traj_3.click(fn=add_provided_traj, inputs=[traj_list, traj_3], outputs=[traj_input, traj_args, traj_input])
-        traj_4.click(fn=add_provided_traj, inputs=[traj_list, traj_4], outputs=[traj_input, traj_args, traj_input])
-        traj_5.click(fn=add_provided_traj, inputs=[traj_list, traj_5], outputs=[traj_input, traj_args, traj_input])
-        traj_6.click(fn=add_provided_traj, inputs=[traj_list, traj_6], outputs=[traj_input, traj_args, traj_input])
-        traj_7.click(fn=add_provided_traj, inputs=[traj_list, traj_7], outputs=[traj_input, traj_args, traj_input])
-        traj_8.click(fn=add_provided_traj, inputs=[traj_list, traj_8], outputs=[traj_input, traj_args, traj_input])
+        for idx, traj_btn in enumerate(
+            [traj_1, traj_2, traj_3, traj_4, traj_5, traj_6, traj_7, traj_8]
+        ):
+            traj_btn.click(fn=add_provided_traj, inputs=[traj_list, traj_btn], outputs=[traj_input, traj_args, traj_input])
 
-        prompt_1.click(fn=add_provided_prompt, inputs=prompt_1, outputs=prompt)
-        prompt_2.click(fn=add_provided_prompt, inputs=prompt_2, outputs=prompt)
-        prompt_3.click(fn=add_provided_prompt, inputs=prompt_3, outputs=prompt)
-        prompt_4.click(fn=add_provided_prompt, inputs=prompt_4, outputs=prompt)
+        for prompt_btn in [prompt_1, prompt_2, prompt_3, prompt_4]:
+            prompt_btn.click(fn=add_provided_prompt, inputs=prompt_btn, outputs=prompt)
 
-        traj_vis.click(
-            fn=fn_vis_traj,
-            inputs=traj_list,
-            outputs=[vis_traj],
-        )
+        traj_vis.click(fn=fn_vis_traj, inputs=traj_list, outputs=[vis_traj])
         traj_input.select(fn=add_traj_point, inputs=traj_list, outputs=[traj_input, traj_args])
         traj_droplast.click(fn=fn_traj_droplast, inputs=traj_list, outputs=[traj_input, traj_args, traj_input])
         traj_reset.click(fn=fn_traj_reset, inputs=traj_list, outputs=[traj_input, traj_args, traj_input])
 
-        # global traj_list
         start.click(fn=model_run_v2, inputs=[prompt, seed, traj_list, n_samples], outputs=gen_video)
 
         gr.Markdown(article)
 
-    demo.queue(max_size=32).launch(**args)
-
+    # Colab-friendly launch with share=True
+    demo.queue(max_size=32).launch(share=True)
 
 if __name__ == "__main__":
-    # python app.py --load {model_path}
-
+    import argparse
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--listen",
-        type=str,
-        default="0.0.0.0" if "SPACE_ID" in os.environ else "127.0.0.1",
-        help="IP to listen on for connections to Gradio",
-    )
-    parser.add_argument("--username", type=str, default="", help="Username for authentication")
-    parser.add_argument("--password", type=str, default="", help="Password for authentication")
-    parser.add_argument(
-        "--server_port",
-        type=int,
-        default=0,
-        help="Port to run the server listener on",
-    )
-    parser.add_argument("--inbrowser", action="store_true", help="Open in browser")
-    parser.add_argument("--share", action="store_true", help="Share the gradio UI")
-
-    parser.add_argument(
-        "--base", type=str, default="configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml"
-    )
+    parser.add_argument("--username", type=str, default="")
+    parser.add_argument("--password", type=str, default="")
+    parser.add_argument("--server_port", type=int, default=0)
+    parser.add_argument("--inbrowser", action="store_true")
+    parser.add_argument("--share", action="store_true")
+    parser.add_argument("--base", type=str, default="configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml")
     parser.add_argument("--load", type=str, default="ckpts/tora/t2v/")
 
     args = parser.parse_args()
 
-    launch_kwargs = {}
-    launch_kwargs["server_name"] = args.listen
-
-    if args.username and args.password:
-        launch_kwargs["auth"] = (args.username, args.password)
-    if args.server_port:
-        launch_kwargs["server_port"] = args.server_port
-    if args.inbrowser:
-        launch_kwargs["inbrowser"] = args.inbrowser
-    if args.share:
-        launch_kwargs["share"] = args.share
-
     from arguments import get_args
-
-    # TODO: passing 'base' params through the command line
     tora_args_list = [
-        "--base",
-        "configs/tora/model/cogvideox_5b_tora.yaml",
+        "--base", "configs/tora/model/cogvideox_5b_tora.yaml",
         "configs/tora/inference_sparse.yaml",
-        "--load",
-        args.load,
+        "--load", args.load,
     ]
     tora_args = get_args(tora_args_list)
     tora_args = argparse.Namespace(**vars(tora_args))
@@ -1379,4 +1321,6 @@ if __name__ == "__main__":
 
     threading.Thread(target=delete_old_files, args=("/tmp/Tora", 48, 3600 * 24), daemon=True).start()
 
-    main(launch_kwargs)
+    # No args passed since launch is handled in `main()`
+    main()
+
