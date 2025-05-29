@@ -1,3 +1,7 @@
+# Addoption of Original Code
+
+This is an addoption of the original paper code, fixing some bugs to run it smoothly. 
+
 <div align="center">
 
 <img src="sat/assets/icon/icon.jpg" width="250"/>
