@@ -18,7 +18,7 @@ tempfile_dir = "/tmp/Tora"
 os.makedirs(tempfile_dir, exist_ok=True)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 SPACE_ID = os.environ.get("SPACE_ID", "")
-os.system("modelscope download --model=xiaoche/Tora --local_dir ./ckpts")
+
 
 #### Description ####
 title = r"""<h1 align="center">Tora: Trajectory-oriented Diffusion Transformer for Video Generation</h1>"""
@@ -858,7 +858,65 @@ from torchvision.utils import flow_to_image
 
 from sat.arguments import set_random_seed
 from sat.model.base_model import get_model
-from sat.training.model_io import load_checkpoint
+
+def load_checkpoint(model, args, load_path=None, prefix='', specific_iteration=None):
+    """Load a model checkpoint without relying on 'latest' metadata."""
+    import os
+    import torch
+    import random
+    import numpy as np
+    from sat import mpu
+    from sat.helpers import print_rank0, print_all
+
+    if load_path is None:
+        load_path = args.load
+
+    # fallback inference mode
+    if not hasattr(args, 'mode'):
+        from copy import deepcopy
+        args = deepcopy(args)
+        args.mode = 'inference'
+
+    # Bypass 'latest' logic, directly construct checkpoint path
+    checkpoint_name = os.path.join(load_path, f'mp_rank_{mpu.get_model_parallel_rank():02d}_model_states.pt')
+    iteration = 0
+
+    if mpu.get_data_parallel_rank() == 0:
+        print_all(f'[INFO] Loading checkpoint: {checkpoint_name}')
+
+    sd = torch.load(checkpoint_name, map_location='cpu')
+
+    # load submodule only
+    new_sd = {'module': {}}
+    for k in sd:
+        if k != 'module':
+            new_sd[k] = sd[k]
+    for k in sd['module']:
+        if k.startswith(prefix):
+            new_sd['module'][k[len(prefix):]] = sd['module'][k]
+    sd = new_sd
+
+    module = model.module if hasattr(model, 'module') else model
+    missing_keys, unexpected_keys = module.load_state_dict(sd['module'], strict=False)
+
+    if len(unexpected_keys) > 0:
+        print_rank0(f'[WARN] Unexpected keys in checkpoint: {unexpected_keys}')
+    if len(missing_keys) > 0:
+        if args.mode == 'inference':
+            if getattr(args, 'force_inference', False):
+                print_rank0(f'[WARN] Missing keys in inference: {missing_keys}')
+            else:
+                raise ValueError(f'[ERROR] Missing keys: {missing_keys}.\nUse --force_inference to skip this check.')
+
+    if args.mode == 'inference':
+        module.eval()
+
+    if mpu.get_data_parallel_rank() == 0:
+        print_all(f'[SUCCESS] Loaded checkpoint from: {checkpoint_name}')
+
+    del sd
+    return iteration
+
 
 
 model = None
