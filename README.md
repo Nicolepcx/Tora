@@ -179,7 +179,7 @@ It requires around 30 GiB GPU memory tested on NVIDIA A100.
 
 ```bash
 cd sat
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=$N_GPU sample_video.py --base configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml --load ckpts/tora/t2v --output-dir samples --point_path trajs/coaster.txt --input-file assets/text/t2v/examples.txt
+N_GPU=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torchrun --standalone --nproc_per_node=1 sample_video.py --base configs/tora/model/cogvideox_5b_tora.yaml configs/tora/inference_sparse.yaml --load ckpts/tora/t2v --output-dir samples --point_path trajs/coaster.txt --input-file assets/text/t2v/examples.txt
 ```
 
 You can change the `--input-file` and `--point_path` to your own prompts and trajectory points files. Please note that the trajectory is drawn on a 256x256 canvas.
