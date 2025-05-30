@@ -1227,6 +1227,8 @@ def main():
                         grid_image,
                         width=canvas_width // 2,
                         height=canvas_height // 2,
+                        interactive=True,
+                        type="pil",
                         label="Canvas for Drawing",
                     )
                     vis_traj = gr.Video(
